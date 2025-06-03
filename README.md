@@ -38,7 +38,7 @@ DeepSeek 增强版提示工程系统是一个集成了多层次提示工程技�
 
 ```bash
 # 克隆项目（假设已有项目文件）
-cd deepseek-enhanced-prompt-system
+git clone https://github.com/AHIJLN/opendeekthing.git
 
 # 安装依赖
 pip install -r requirements.txt
