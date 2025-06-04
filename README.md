@@ -59,19 +59,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. 修正 requirements.txt（可选）
-
-建议更新 `requirements.txt` 为：
-
-```txt
-openai>=1.0.0
-python-dotenv>=1.0.0
-pyyaml>=6.0.1
-rich>=13.0.0
-markdown>=3.5.0
-tiktoken>=0.5.0
-```
-
 ## ⚙️ 配置说明
 
 ### 1. API 密钥配置
