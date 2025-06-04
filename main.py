@@ -1,6 +1,5 @@
 """
-增强版DeepSeek提示工程系统 - 主程序
-支持多种输入模式：普通输入、多行输入、粘贴模式、文件输入
+增强版DeepSeek提示工程系统 - 支持编程模式和战略分析模式
 """
 import sys
 import os
@@ -8,10 +7,12 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.table import Table
+from rich.live import Live
 from rich.text import Text
 from conversation.manager import ConversationManager
-from prompts.task import get_available_tasks
+from prompts.loader import PromptLoader
 from utils.markdown_export import MarkdownExporter
+from config import config
 from datetime import datetime
 import logging
 
@@ -30,13 +31,6 @@ try:
     os.makedirs(debug_dir, exist_ok=True)
     if os.path.exists(debug_dir):
         print(f"✓ 调试目录已创建: {os.path.abspath(debug_dir)}")
-        test_file = os.path.join(debug_dir, "test.txt")
-        with open(test_file, 'w') as f:
-            f.write("test")
-        os.remove(test_file)
-        print("✓ 文件写入权限正常")
-    else:
-        print("✗ 无法创建调试目录")
 except Exception as e:
     print(f"✗ 创建调试目录时出错: {e}")
     debug_dir = "."
@@ -47,11 +41,10 @@ class EnhancedInput:
     @staticmethod
     def detect_truncation(text, max_expected=4000):
         """检测输入是否可能被截断"""
-        # 检测截断的特征
         indicators = [
-            len(text) > max_expected * 0.9,  # 接近最大长度
-            text.endswith('?') and len(text) > 200,  # 以问号结束且较长
-            text.count('。') == 0 and len(text) > 300,  # 没有句号的长文本
+            len(text) > max_expected * 0.9,
+            text.endswith('?') and len(text) > 200,
+            text.count('。') == 0 and len(text) > 300,
             not text.endswith(('.', '。', '!', '！', '?', '？', '"', '"', '）', ')')) and len(text) > 200
         ]
         return any(indicators)
@@ -71,11 +64,9 @@ class EnhancedInput:
             try:
                 line = input()
                 
-                # 检查是否输入END
                 if line.strip().upper() == 'END':
                     break
                 
-                # 检查连续空行
                 if not line:
                     empty_count += 1
                     if empty_count >= 2:
@@ -95,7 +86,7 @@ class EnhancedInput:
     
     @staticmethod
     def paste_mode():
-        """粘贴模式 - 使用sys.stdin读取"""
+        """粘贴模式"""
         console.print("[cyan]粘贴模式已激活[/cyan]")
         console.print("[dim]请粘贴内容，然后按 Ctrl+D (Mac/Linux) 或 Ctrl+Z (Windows) 结束[/dim]")
         
@@ -115,8 +106,7 @@ class EnhancedInput:
         console.print("[cyan]文件输入模式[/cyan]")
         filename = input("请输入文件路径 (支持拖拽文件): ").strip().strip('"\'')
         
-        # 处理路径中的空格和特殊字符
-        filename = os.path.expanduser(filename)  # 展开~
+        filename = os.path.expanduser(filename)
         
         if not filename:
             console.print("[yellow]未提供文件路径[/yellow]")
@@ -129,7 +119,6 @@ class EnhancedInput:
             console.print(f"[green]✓ 成功读取文件: {filename}[/green]")
             console.print(f"[dim]文件大小: {len(content)} 字符[/dim]")
             
-            # 显示文件内容预览
             preview_lines = content.split('\n')[:5]
             if len(preview_lines) < len(content.split('\n')):
                 preview_lines.append('...')
@@ -152,7 +141,7 @@ class EnhancedInput:
     
     @staticmethod
     def smart_input(first_attempt=""):
-        """智能输入 - 自动选择最佳输入方式"""
+        """智能输入"""
         if first_attempt and EnhancedInput.detect_truncation(first_attempt):
             console.print("\n[yellow]⚠️  检测到输入可能被截断[/yellow]")
             console.print("[cyan]已自动切换到多行输入模式[/cyan]")
@@ -160,21 +149,49 @@ class EnhancedInput:
         
         return first_attempt
 
-def display_welcome():
+def display_mode_selection():
+    """显示模式选择界面"""
+    console.print("\n" + "="*60)
+    console.print("[bold cyan]请选择工作模式:[/bold cyan]\n")
+    
+    modes = PromptLoader.get_available_modes()
+    
+    console.print("[bold green]1. 编程模式 (Programming Mode)[/bold green]")
+    console.print("   " + modes["programming"])
+    console.print("   适用于：代码开发、调试、技术问题解决、架构设计\n")
+    
+    console.print("[bold yellow]2. 战略分析模式 (Strategic Analysis Mode)[/bold yellow]")
+    console.print("   " + modes["strategic"])
+    console.print("   适用于：商业分析、战略规划、市场研究、决策支持\n")
+    
+    console.print("="*60)
+    
+    while True:
+        choice = input("\n请选择模式 (1 或 2): ").strip()
+        if choice == "1":
+            return "programming"
+        elif choice == "2":
+            return "strategic"
+        else:
+            console.print("[red]无效选择，请输入 1 或 2[/red]")
+
+def display_welcome(mode):
     """显示欢迎信息"""
-    welcome_text = """
+    mode_name = "编程模式" if mode == "programming" else "战略分析模式"
+    mode_color = "green" if mode == "programming" else "yellow"
+    
+    welcome_text = f"""
 # 🚀 DeepSeek 增强版提示工程系统
 
-这是一个集成了多层次提示工程技术的对话系统，包括：
+## 当前模式：{mode_name}
 
-- **认知架构**: 模拟人类认知过程
-- **元提示**: 自我改进和反思能力
-- **系统提示**: 深度思考和推理
-- **任务提示**: 特定领域优化
+您已选择 **{mode_name}**，系统已加载相应的三层提示架构：
+- **认知架构层 (Cognitive Architecture)**: 定义思维模式和知识组织
+- **元提示层 (Meta-Prompt)**: 优化响应策略和质量标准
+- **系统提示层 (System Prompt)**: 具体执行协议和输出规范
 
 ## 可用命令：
 - `/help` - 显示帮助信息
-- `/task` - 切换任务模式
 - `/save` - 保存对话记录
 - `/clear` - 清空对话历史
 - `/input` - 切换输入模式
@@ -191,46 +208,17 @@ def display_welcome():
 
 开始对话吧！
     """
-    console.print(Panel(Markdown(welcome_text), title="欢迎使用", border_style="green"))
+    console.print(Panel(Markdown(welcome_text), title=f"欢迎使用 - {mode_name}", border_style=mode_color))
 
-def display_tasks():
-    """显示可用任务"""
-    table = Table(title="可用任务模式")
-    table.add_column("编号", style="cyan", width=6)
-    table.add_column("任务类型", style="magenta")
-    table.add_column("描述", style="green")
-    
-    tasks_dict = {
-        "code": "代码助手模式 - 专注于编程和技术问题",
-        "analysis": "分析助手模式 - 深度分析和问题解决",
-        "creative": "创意写作模式 - 创意内容和文学创作",
-        "learning": "学习辅导模式 - 教育和知识传授",
-        "default": "通用对话模式 - 日常对话和通用问答"
-    }
-    
-    tasks = get_available_tasks()
-    
-    if isinstance(tasks, dict):
-        for idx, (task_type, description) in enumerate(tasks.items(), 1):
-            table.add_row(str(idx), task_type, description)
-    elif isinstance(tasks, list):
-        for idx, task_type in enumerate(tasks, 1):
-            description = tasks_dict.get(task_type, "任务模式")
-            table.add_row(str(idx), task_type, description)
-    else:
-        for idx, (task_type, description) in enumerate(tasks_dict.items(), 1):
-            table.add_row(str(idx), task_type, description)
-    
-    console.print(table)
-
-def display_help():
+def display_help(mode):
     """显示帮助信息"""
-    help_text = """
-## 命令说明：
+    mode_name = "编程模式" if mode == "programming" else "战略分析模式"
+    
+    help_text = f"""
+## 当前模式：{mode_name}
 
 ### 基本命令：
 - `/help` - 显示此帮助信息
-- `/task` - 查看并切换任务模式
 - `/save` - 保存当前对话到Markdown文件
 - `/clear` - 清空对话历史（重新开始）
 - `/exit` - 退出程序
@@ -254,8 +242,12 @@ def display_help():
 - 输入截断检测：自动识别被截断的输入并切换到多行模式
 - 自动保存：每5轮对话自动保存
 - 调试日志：超过200字符的输入自动保存到debug_logs目录
+
+### 注意事项：
+- 选择模式后，在对话过程中无法切换模式
+- 如需切换模式，请使用 `/exit` 退出后重新启动程序
     """
-    console.print(Panel(Markdown(help_text), title="帮助信息", border_style="yellow"))
+    console.print(Panel(Markdown(help_text), title="帮助信息", border_style="cyan"))
 
 def save_debug_input(user_input, timestamp):
     """保存用户输入到调试文件"""
@@ -278,25 +270,21 @@ def save_debug_input(user_input, timestamp):
         return None
 
 def get_enhanced_input(input_mode="auto"):
-    """获取用户输入 - 支持多种模式"""
+    """获取用户输入"""
     console.print("\n[bold cyan]您:[/bold cyan]", end=" ")
     sys.stdout.flush()
     
     try:
         if input_mode == "auto":
-            # 自动模式：先尝试普通输入，检测截断
             first_line = input()
             
-            # 检查命令
             if first_line.startswith('/'):
                 return first_line
             
-            # 检查是否需要多行输入
             if first_line.endswith('\\') or len(first_line) > 200:
                 console.print("[dim cyan]检测到多行输入标记，进入多行模式...[/dim cyan]")
                 return EnhancedInput.multiline_input(first_line=first_line.rstrip('\\'))
             
-            # 智能检测截断
             return EnhancedInput.smart_input(first_line)
             
         elif input_mode == "multiline":
@@ -343,15 +331,22 @@ def select_input_mode():
 
 def main():
     """主程序入口"""
-    display_welcome()
+    # 选择工作模式
+    selected_mode = display_mode_selection()
+    
+    # 显示欢迎信息
+    display_welcome(selected_mode)
     
     # 初始化管理器
-    manager = ConversationManager()
+    manager = ConversationManager(mode=selected_mode)
     manager.initialize()
     
     # 对话计数器和输入模式
     conversation_count = 0
     current_input_mode = "auto"
+    
+    console.print(f"\n[bold green]已进入 {manager.get_mode_description()}[/bold green]")
+    console.print("[dim]提示：在对话过程中无法切换模式。如需切换，请退出后重新启动。[/dim]\n")
     
     while True:
         try:
@@ -364,7 +359,7 @@ def main():
                 break
                 
             elif user_input.lower() == '/help':
-                display_help()
+                display_help(selected_mode)
                 continue
                 
             elif user_input.lower() == '/input':
@@ -375,47 +370,20 @@ def main():
                 continue
                 
             elif user_input.lower() == '/file':
-                # 直接进入文件输入模式
                 user_input = EnhancedInput.file_input()
                 if not user_input:
                     continue
                     
             elif user_input.lower() == '/paste':
-                # 直接进入粘贴模式
                 user_input = EnhancedInput.paste_mode()
                 if not user_input:
                     continue
                     
-            elif user_input.lower() == '/task':
-                display_tasks()
-                console.print("\n[yellow]选择任务模式 (输入编号):[/yellow]", end=" ")
-                choice = input()
-                
-                try:
-                    tasks = get_available_tasks()
-                    if isinstance(tasks, dict):
-                        task_list = list(tasks.keys())
-                    elif isinstance(tasks, list):
-                        task_list = tasks
-                    else:
-                        task_list = ["code", "analysis", "creative", "learning", "default"]
-                    
-                    task_idx = int(choice) - 1
-                    if 0 <= task_idx < len(task_list):
-                        new_task = task_list[task_idx]
-                        manager.switch_task(new_task)
-                        console.print(f"[green]已切换到 {new_task} 模式[/green]")
-                    else:
-                        console.print("[red]无效的选择[/red]")
-                except ValueError:
-                    console.print("[red]请输入有效的数字[/red]")
-                continue
-                
             elif user_input.lower() == '/save':
                 exporter = MarkdownExporter()
                 filename = exporter.export_conversation(
                     manager.history.messages,
-                    manager.task_type
+                    selected_mode
                 )
                 console.print(f"[green]对话已保存到: {filename}[/green]")
                 continue
@@ -432,18 +400,12 @@ def main():
                     console.print(f"[green]文件大小: {os.path.getsize(debug_file)} 字节[/green]")
                 else:
                     console.print("[red]✗ 测试失败！请检查文件权限。[/red]")
-                
-                if os.path.exists(debug_dir):
-                    files = os.listdir(debug_dir)
-                    console.print(f"\n[cyan]debug_logs目录内容 ({len(files)} 个文件):[/cyan]")
-                    for f in files[-5:]:
-                        console.print(f"  - {f}")
                 continue
                 
             elif user_input.lower() == '/clear':
-                manager.history.clear()
-                console.print("[yellow]对话历史已清空[/yellow]")
+                manager.clear_history()
                 manager.initialize()
+                console.print("[yellow]对话历史已清空[/yellow]")
                 conversation_count = 0
                 continue
             
@@ -466,21 +428,53 @@ def main():
             else:
                 console.print(f"\n[dim]您: {user_input}[/dim]")
             
-            console.print("\n[bold green]AI:[/bold green]")
+            mode_indicator = "[green]编程模式[/green]" if selected_mode == "programming" else "[yellow]战略分析模式[/yellow]"
+            console.print(f"\n[bold]AI ({mode_indicator}):[/bold]")
             
             # 获取响应
             try:
-                response = manager.chat(user_input)
-                
-                if len(response) > 2000:
-                    console.print(f"[dim](响应长度: {len(response)} 字符)[/dim]")
-                
-                md = Markdown(response)
-                console.print(md)
-                
+                # 检查是否启用流式响应
+                use_stream = config.get("stream_response", True)  # 默认启用流式响应
+
+                if use_stream:
+                    # 流式响应
+                    full_response = ""
+
+                    # 使用 Live 实现平滑的实时更新
+                    with Live(Text("正在生成响应...", style="dim italic"),
+                             console=console,
+                             refresh_per_second=10) as live:
+
+                        # 收集响应片段并实时显示
+                        for chunk in manager.chat_stream(user_input):
+                            full_response += chunk
+                            # 实时更新显示的文本（显示最后500个字符作为预览）
+                            preview = full_response[-500:] if len(full_response) > 500 else full_response
+                            live.update(Text(preview + "▌", style="dim"))
+
+                    # 流式响应完成后，渲染完整的 Markdown
+                    if len(full_response) > 2000:
+                        console.print(f"[dim](响应长度: {len(full_response)} 字符)[/dim]")
+
+                    # 使用 Markdown 渲染最终响应
+                    md = Markdown(full_response)
+                    console.print(md)
+
+                else:
+                    # 非流式响应（原来的方式）
+                    response = manager.chat(user_input)
+
+                    if len(response) > 2000:
+                        console.print(f"[dim](响应长度: {len(response)} 字符)[/dim]")
+
+                    md = Markdown(response)
+                    console.print(md)
+
             except Exception as e:
                 console.print(f"[red]生成响应时出错: {str(e)}[/red]")
                 logging.error(f"Chat error: {e}", exc_info=True)
+                
+                
             
             # 自动保存对话（每5轮）
             if conversation_count % 5 == 0:
@@ -488,7 +482,7 @@ def main():
                     exporter = MarkdownExporter()
                     filename = exporter.export_conversation(
                         manager.history.messages,
-                        manager.task_type
+                        selected_mode
                     )
                     console.print(f"\n[dim](自动保存: {filename})[/dim]")
                 except Exception as e:
