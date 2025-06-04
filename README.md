@@ -93,6 +93,15 @@ max_tokens: 4000
   "max_tokens": 4000
 }
 ```
+#### 方法三：直接添加API-KEY
+
+條改config.py 20行旳api-key为deepseek的官方API，直接可用，换API-Key即可：
+```
+    DEFAULTS = {
+        # API配置
+        "api_key": "xxxxxxxxxxxxxxx",
+```
+如果用的是火山或者阿里的，得换API路径和模型名。
 
 ### 2. 配置选项说明
 
