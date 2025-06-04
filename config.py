@@ -17,11 +17,10 @@ class Config:
     # 默认配置值
     DEFAULTS = {
         # API配置
-        "api_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "api_key": "xxxxxxxxxxxxxxx",
         "base_url": "https://api.deepseek.com",
         "api_version": "v1",
         "model_name": "deepseek-reasoner",
-        
         # 模型参数
         "temperature": 1.0,
         "max_tokens": 4000,
@@ -39,7 +38,7 @@ class Config:
         
         # 对话配置
         "max_history_length": 10,
-        "stream_response": False,
+        "stream_response": True,
         
         # API重试配置
         "max_retries": 3,
