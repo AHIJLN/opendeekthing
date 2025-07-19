@@ -99,6 +99,8 @@ streamlit run app.py
 
 应用将在浏览器中自动打开，默认地址：`http://localhost:8501`
 
+
+
 ## 📖 使用指南
 
 ### 1. 初次使用
@@ -108,6 +110,8 @@ streamlit run app.py
    - 输入您的 DeepSeek API Key
    - 选择模型（deepseek-chat 或 deepseek-reasoner）
    - 点击"💾 保存API配置"
+<img width="1432" height="748" alt="image" src="https://github.com/user-attachments/assets/539a9d1e-1c06-4e16-90fb-ebffe7fce22b" />
+
 
 2. **选择提示词模式**
    - 在"🧠 提示词模式管理"中选择预设模式
@@ -145,28 +149,6 @@ streamlit run app.py
 - 点击"📥 下载对话 (Markdown)"
 - 自动生成包含配置信息和完整对话的 Markdown 文件
 
-## 📁 项目结构
-
-```
-LLM_Pro/
-├── api/                      # API 客户端
-│   └── deepseek_client.py   # DeepSeek API 封装
-├── conversation/             # 对话管理
-│   └── manager.py           # 会话管理器
-├── prompts/                  # 预设提示词
-│   ├── loader.py            # 提示词加载器
-│   ├── programming_prompts.py
-│   ├── strategic_prompts.py
-│   └── tutorial_writing_prompts.py
-├── user_configs/             # 用户配置（自动创建）
-│   ├── api_config.json      # API 配置
-│   ├── prompt_dictionary.json # Prompt 库
-│   └── *.json               # 自定义提示词模式
-├── utils/                    # 工具模块
-│   └── markdown_export.py   # Markdown 导出
-├── app.py                    # 主应用
-└── requirements.txt          # 依赖列表
-```
 
 ## ⚙️ 配置说明
 
@@ -214,9 +196,26 @@ LLM_Pro/
 2. 定义三层提示词结构
 3. 在 `prompt_manager.py` 的 `DEFAULT_PROMPTS` 中注册
 
-## 📝 许可证
+## 📝 MIT 许可证
 
-[添加您的许可证信息]
+本项目采用 MIT 许可证。详见 LICENSE 文件。
+MIT License
+Copyright (c) 2024 opendeekthing
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ## 🙏 致谢
 
