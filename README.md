@@ -26,283 +26,206 @@ DeepSeek 增强版提示工程系统是一个集成了先进提示工程技术�
 ```
 
 
-## 📦 安装步骤
+# Deepseek Plus
 
-### 1. 环境要求
+🚀 支持多种提示词模式管理、API 配置持久化和 Prompt 库功能。专为提示工程设计，让您能够高效地与大语言模型进行交互。
 
-- Python 3.8 或更高版本
+## ✨ 主要功能
+
+### 1. **多模型支持**
+- 支持 DeepSeek API
+- 可扩展支持其他 OpenAI 兼容的 API
+
+### 2. **API 配置管理**
+- API 密钥安全存储
+- 配置持久化（自动保存和加载）
+- 支持自定义 API 端点
+- 温度、最大 Tokens 等参数调节
+
+### 3. **提示词模式管理**
+- 预设三种专业模式：
+  - 📝 **编程模式**：专业的代码助手，具备深度编程认知架构
+  - 📊 **战略分析模式**：世界级战略顾问，提供 Fortune 500 级别的分析
+  - 📚 **教程写作模式**：将复杂内容转化为清晰教程的专家
+- 支持创建和保存自定义模式
+- 三层提示词架构（认知架构、元提示、系统提示）
+
+### 4. **Prompt 库管理**
+- 保存常用 Prompt 模板
+- 分页浏览（每页 10 条）
+- 一键使用：点击即可发送到对话
+- 支持编辑和删除
+
+### 5. **对话管理**
+- 流式响应显示
+- 对话历史保存
+- 导出为 Markdown 格式
+- 一键开始新对话
+
+## 🛠️ 安装指南
+
+### 环境要求
+- Python 3.8+
 - pip 包管理器
 
-### 2. 克隆或下载项目
+### 安装步骤
 
+1. **克隆项目**
 ```bash
-# 克隆项目（如果使用Git）
 git clone https://github.com/AHIJLN/opendeekthing.git
-cd opendeekthink
-
-# 或直接下载并解压项目文件
+cd opendeekthing
 ```
 
-### 3. 安装依赖
-
+2. **创建虚拟环境**（推荐）
 ```bash
-# 建议使用虚拟环境
 python -m venv venv
 
-# 激活虚拟环境
-# Windows:
+# Windows
 venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
 
-# 安装依赖
+# macOS/Linux
+source venv/bin/activate
+```
+
+3. **安装依赖**
+```bash
 pip install -r requirements.txt
+```
+
+4. **运行应用**
+```bash
+streamlit run app.py
+```
+
+应用将在浏览器中自动打开，默认地址：`http://localhost:8501`
+
+## 📖 使用指南
+
+### 1. 初次使用
+
+1. **配置 API**
+   - 在左侧边栏展开"🔑 通用API配置"
+   - 输入您的 DeepSeek API Key
+   - 选择模型（deepseek-chat 或 deepseek-reasoner）
+   - 点击"💾 保存API配置"
+
+2. **选择提示词模式**
+   - 在"🧠 提示词模式管理"中选择预设模式
+   - 或创建自定义模式
+
+3. **开始对话**
+   - 在主界面输入框中输入问题
+   - 按 Enter 发送
+
+### 2. Prompt 库使用
+
+1. **添加 Prompt**
+   - 展开"📚 Prompt库管理"
+   - 在标题和内容框中输入
+   - 点击"➕ 添加"
+
+2. **使用 Prompt**
+   - 浏览 Prompt 列表
+   - 点击"💬 [Prompt标题]"直接使用
+
+3. **管理 Prompt**
+   - 点击"✏️"编辑
+   - 点击"🗑️"删除
+
+### 3. 提示词模式详解
+
+每个模式包含三层架构：
+
+- **认知架构（Cognitive）**：定义 AI 的思维框架和知识组织方式
+- **元提示（Meta）**：指导 AI 如何优化响应和适应不同场景
+- **系统提示（System）**：定义 AI 的身份、能力和输出规范
+
+### 4. 导出对话
+
+- 点击"📥 下载对话 (Markdown)"
+- 自动生成包含配置信息和完整对话的 Markdown 文件
+
+## 📁 项目结构
+
+```
+LLM_Pro/
+├── api/                      # API 客户端
+│   └── deepseek_client.py   # DeepSeek API 封装
+├── conversation/             # 对话管理
+│   └── manager.py           # 会话管理器
+├── prompts/                  # 预设提示词
+│   ├── loader.py            # 提示词加载器
+│   ├── programming_prompts.py
+│   ├── strategic_prompts.py
+│   └── tutorial_writing_prompts.py
+├── user_configs/             # 用户配置（自动创建）
+│   ├── api_config.json      # API 配置
+│   ├── prompt_dictionary.json # Prompt 库
+│   └── *.json               # 自定义提示词模式
+├── utils/                    # 工具模块
+│   └── markdown_export.py   # Markdown 导出
+├── app.py                    # 主应用
+└── requirements.txt          # 依赖列表
 ```
 
 ## ⚙️ 配置说明
 
-### 1. API 密钥配置
+### API 配置参数
 
-#### 方法一：使用环境变量（推荐）
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| API Key | DeepSeek API 密钥 | 无 |
+| Base URL | API 端点地址 | https://api.deepseek.com |
+| 模型 | 选择使用的模型 | deepseek-chat |
+| 温度 | 控制输出的随机性（0-2） | 1.0 |
+| 最大 Tokens | 单次回复的最大长度 | 4096 |
 
-创建 `.env` 文件：
+### 自定义提示词模式
 
-```bash
-# .env 文件内容
-DEEPSEEK_API_KEY=your-api-key-here
-```
-
-#### 方法二：使用配置文件
-
-创建 `config.yaml` 或 `config.json`：
-
-```yaml
-# config.yaml 示例
-api_key: your-api-key-here
-model_name: deepseek-reasoner
-temperature: 1.0
-max_tokens: 4000
-```
+创建新模式时，建议参考预设模式的结构：
 
 ```json
-// config.json 示例
 {
-  "api_key": "your-api-key-here",
-  "model_name": "deepseek-reasoner",
-  "temperature": 1.0,
-  "max_tokens": 4000
+  "cognitive": "定义AI的认知架构...",
+  "meta": "定义元层面的优化策略...",
+  "system": "定义系统级别的行为规范..."
 }
 ```
-#### 方法三：直接添加API-KEY
 
-條改config.py 20行旳api-key为deepseek的官方API，直接可用，换API-Key即可：
-```
-    DEFAULTS = {
-        # API配置
-        "api_key": "xxxxxxxxxxxxxxx",
-```
-如果用的是火山或者阿里的，得换API路径和模型名。
+## 🔒 安全说明
 
-### 2. 配置选项说明
+- API 密钥仅保存在本地 `user_configs/api_config.json`
+- 建议将 `user_configs/` 添加到 `.gitignore`
+- 不要分享包含 API 密钥的配置文件
 
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| `api_key` | DeepSeek API 密钥 | 必填 |
-| `model_name` | 使用的模型名称 | deepseek-reasoner |
-| `temperature` | 生成温度（0-2） | 1.0 |
-| `max_tokens` | 最大生成令牌数 | 4000 |
-| `stream_response` | 是否使用流式响应 | true |
-| `enable_cognitive` | 启用认知架构层 | true |
-| `enable_meta` | 启用元提示层 | true |
-| `enable_system` | 启用系统提示层 | true |
+## 🤝 贡献指南
 
-## 🎯 基本使用
+欢迎提交 Issue 和 Pull Request！
 
-### 1. 启动程序
+### 添加新的 API 支持
 
-```bash
-python main.py
-```
+1. 在 `api/` 目录创建新的客户端类
+2. 实现与 `DeepSeekClient` 相同的接口
+3. 在 `app.py` 中添加模型选项
 
-### 2. 选择工作模式
+### 添加新的预设模式
 
-启动后会看到模式选择界面：
+1. 在 `prompts/` 目录创建新的提示词文件
+2. 定义三层提示词结构
+3. 在 `prompt_manager.py` 的 `DEFAULT_PROMPTS` 中注册
 
-```
-==============================================================
-请选择工作模式:
+## 📝 许可证
 
-1. 编程模式 (Programming Mode)
-   编程模式 - 专注于代码开发和技术问题解决
-   适用于：代码开发、调试、技术问题解决、架构设计
+[添加您的许可证信息]
 
-2. 战略分析模式 (Strategic Analysis Mode)
-   战略分析模式 - 专注于商业战略和深度分析
-   适用于：商业分析、战略规划、市场研究、决策支持
+## 🙏 致谢
 
-==============================================================
+- 基于 Streamlit 构建
+- 使用 OpenAI Python 客户端库
+- 灵感来自于先进的提示工程实践
 
-请选择模式 (1 或 2): 
-```
+---
 
-### 3. 开始对话
+如有问题或建议，欢迎提交 Issue 或联系作者。
 
-选择模式后，即可开始对话。系统会根据您选择的模式加载相应的提示架构。
-
-## 🎨 功能特性
-
-### 1. 多种输入模式
-
-- **普通模式**：直接输入，适合短内容
-- **多行模式**：支持多行输入，输入 `END` 或双击 Enter 结束
-- **粘贴模式**：使用 `/paste` 命令，适合复制粘贴长文本
-- **文件模式**：使用 `/file` 命令，从文件读取内容
-
-### 2. 智能输入检测
-
-系统会自动检测输入是否被截断，并智能切换到多行模式。
-
-### 3. 可用命令
-
-| 命令 | 功能 |
-|------|------|
-| `/help` | 显示帮助信息 |
-| `/save` | 保存对话记录为 Markdown 文件 |
-| `/clear` | 清空对话历史 |
-| `/input` | 切换输入模式 |
-| `/file` | 从文件读取输入 |
-| `/paste` | 进入粘贴模式 |
-| `/debug` | 测试调试功能 |
-| `/exit` | 退出程序 |
-
-### 4. 自动保存
-
-每进行 5 轮对话，系统会自动保存对话记录到 `output/conversations` 目录。
-
-### 5. 流式响应
-
-支持实时流式输出，让您能够看到 AI 的思考过程。
-
-## 📝 使用示例
-
-### 示例 1：编程模式
-
-```
-您: 请帮我实现一个 Python 装饰器，用于计算函数执行时间
-
-AI (编程模式):
-```thinking
-[Problem Analysis]
-- 需要创建一个装饰器来测量函数执行时间
-- 应该支持带参数和不带参数的函数
-- 需要保留原函数的元信息
-- 输出应该清晰易读
-
-[Solution Design]
-- 使用 time 模块记录开始和结束时间
-- 使用 functools.wraps 保留函数元信息
-- 支持同步和异步函数
-```
-
-我将为您实现一个功能完善的执行时间计算装饰器...
-
-[完整代码实现]
-```
-
-### 示例 2：战略分析模式
-
-```
-您: 分析一下新能源汽车行业的发展趋势和投资机会
-
-AI (战略分析模式):
-## 执行摘要
-1. 新能源汽车行业正处于高速增长期，预计未来5年复合增长率超过25%
-2. 技术突破和政策支持是主要驱动力
-3. 建议关注电池技术、智能驾驶和充电基础设施三大投资方向
-
-## 详细分析
-[完整的战略分析报告]
-```
-
-## 🔧 高级配置
-
-### 1. 自定义提示层
-
-您可以通过修改配置文件来启用或禁用特定的提示层：
-
-```yaml
-# 仅启用系统提示层
-enable_cognitive: false
-enable_meta: false
-enable_system: true
-```
-
-### 2. 调整模型参数
-
-```yaml
-# 更有创造性的输出
-temperature: 1.5
-top_p: 0.95
-
-# 更长的响应
-max_tokens: 8000
-```
-
-### 3. 自定义输出目录
-
-```yaml
-output_dir: "my_conversations"
-markdown_template: "chat_{timestamp}.md"
-```
-
-## ❓ 常见问题
-
-### Q1: 如何获取 DeepSeek API 密钥？
-
-访问 [DeepSeek 官网](https://platform.deepseek.com/) 注册账号并获取 API 密钥。
-
-### Q2: 为什么响应速度较慢？
-
-1. 检查网络连接
-2. 考虑使用流式响应（默认已启用）
-3. 调整 `max_tokens` 参数
-
-### Q3: 如何处理超长输入？
-
-使用以下方法之一：
-- 在输入末尾添加 `\` 进入多行模式
-- 使用 `/paste` 命令粘贴长文本
-- 使用 `/file` 命令从文件读取
-
-### Q4: 对话记录保存在哪里？
-
-默认保存在 `output/conversations` 目录，文件名格式为 `conversation_时间戳.md`。
-
-### Q5: 如何切换工作模式？
-
-在对话过程中无法切换模式。需要使用 `/exit` 退出程序后重新启动选择。
-
-## 🚨 注意事项
-
-1. **API 密钥安全**：不要将 API 密钥提交到版本控制系统
-2. **配置文件**：建议使用 `.env` 文件管理敏感信息
-3. **输入长度**：注意 API 的令牌限制
-4. **费用控制**：留意 API 使用量和费用
-
-## 🔍 调试技巧
-
-1. **查看调试日志**：超过 200 字符的输入会自动保存到 `debug_logs` 目录
-2. **测试调试功能**：使用 `/debug` 命令测试调试日志功能
-3. **检查配置**：程序启动时会显示当前配置信息
-
-
-
-## 🎉 开始使用
-
-现在您已经了解了所有基础知识，可以开始使用 DeepSeek 增强版提示工程系统了！
-
-```bash
-python main.py
-```
-
-祝您使用愉快！如有任何问题，请参考帮助文档或提交问题反馈。
+祝您使用愉快！🎉
